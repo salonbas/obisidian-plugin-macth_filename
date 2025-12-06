@@ -1,0 +1,21 @@
+/* 定義高亮樣式 */
+.cm-filename-highlight {
+    color: white ; /*!important; /* 文字顏色 */
+    border-bottom: 2px solid #ff4400; /* 底部紅線 */
+    border-radius: 4px;
+    padding: 0 2px;
+    font-weight: normal;
+}
+
+/* Dark mode 適配 (選用) */
+.theme-dark .cm-filename-highlight {
+    border-bottom: 2px solid #64c8ff;
+    color: #e0e0e0 !important;
+}
+
+/* Light mode 優化 */
+.theme-light .cm-filename-highlight {
+    border-bottom: 2px solid #ff4400;
+    color: #333 !important;
+}
+
