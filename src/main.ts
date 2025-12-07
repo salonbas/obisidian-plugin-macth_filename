@@ -46,26 +46,45 @@ export default class FilenameHighlighterPlugin extends Plugin {
                     const file = app.workspace.getActiveFile();
                     if (!file) return Decoration.none;
 
-                    const keyword = file.basename;
-                    if (!keyword || keyword.length < 2) return Decoration.none;
+                    // 將檔名按空格分割成多個關鍵字，並過濾掉空字串和太短的關鍵字
+                    const keywords = file.basename
+                        .split(/\s+/)
+                        .filter(kw => kw && kw.length >= 2);
+                    
+                    if (keywords.length === 0) return Decoration.none;
 
+                    // 先收集所有匹配結果
+                    const matches: Array<{ start: number; end: number }> = [];
+                    
                     for (let { from, to } of view.visibleRanges) {
                         const text = view.state.doc.sliceString(from, to);
-                        const regex = new RegExp(this.escapeRegExp(keyword), 'gi');
                         
-                        let match;
-                        while ((match = regex.exec(text)) !== null) {
-                            const start = from + match.index;
-                            const end = start + match[0].length;
-
-                            builder.add(
-                                start,
-                                end,
-                                Decoration.mark({
-                                    class: "cm-filename-highlight"
-                                })
-                            );
+                        // 對每個關鍵字進行匹配
+                        for (const keyword of keywords) {
+                            const regex = new RegExp(this.escapeRegExp(keyword), 'gi');
+                            
+                            let match;
+                            while ((match = regex.exec(text)) !== null) {
+                                const start = from + match.index;
+                                const end = start + match[0].length;
+                                
+                                matches.push({ start, end });
+                            }
                         }
+                    }
+                    
+                    // 按 start 位置排序，確保按順序添加到 builder
+                    matches.sort((a, b) => a.start - b.start);
+                    
+                    // 按順序添加到 builder
+                    for (const { start, end } of matches) {
+                        builder.add(
+                            start,
+                            end,
+                            Decoration.mark({
+                                class: "cm-filename-highlight"
+                            })
+                        );
                     }
 
                     return builder.finish();
